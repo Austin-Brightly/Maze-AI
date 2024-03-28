@@ -6,7 +6,8 @@ import tkinter as tk
 
 class BoardState:
     """
-    Boardstate is a class which represents a maze
+    Boardstate is a class which represents a maze\
+    3 = start
     2 = goal tile
     1 = explored space
     0 = wall
