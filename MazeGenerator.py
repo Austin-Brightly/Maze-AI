@@ -1,5 +1,6 @@
 import os
 import random
+import sys
 
 def create_end_tile(maze, rows, columns, position):
     # POSITION: top=1, bottom=2, left=3, right=any other number
@@ -7,8 +8,8 @@ def create_end_tile(maze, rows, columns, position):
         end_created = False
         top_index = 1
         while not end_created and top_index in range(1, columns - 1):
-            if maze[1][top_index] == -1:
-                maze[0][top_index] = 2
+            if maze[1][top_index-1] == -1:
+                maze[0][top_index-1] = 2
                 end_created = True
             top_index += 1
     elif position == 2:
@@ -30,9 +31,10 @@ def create_end_tile(maze, rows, columns, position):
     else:
         end_created = False
         top_index = 1
-        while not end_created and top_index in range(1, columns - 1):
-            if maze[top_index][columns-2] == -1:
-                maze[top_index][columns-1] = 2
+        while not end_created and top_index in range(1, rows - 1):
+            #print(f"top_index:{top_index}, columns:{columns}")
+            if maze[top_index-1][columns-2] == -1:
+                maze[top_index-1][columns-1] = 2
                 end_created = True
             top_index += 1
     return maze
@@ -56,7 +58,7 @@ def generate_maze_prim(rows, columns):
     x = int(columns/2)
     y = int(rows/2)
     maze[y][x] = -1
-    print(f"x:{x}, y:{y}")
+    #print(f"x:{x}, y:{y}")
 
     # Compute frontier
     frontier_set = nearby_tiles(x=x, y=y, rows=rows-1, cols=columns-1, dist=2)
@@ -109,7 +111,7 @@ def print_maze(maze):
             else:
                 print(u"\u25A0", end="")
         print()
-def maze_to_image(maze, name):
+def maze_to_p1(maze, name):
     # create ppm image from array
     rows = len(maze)
     cols = len(maze[0])
@@ -123,16 +125,43 @@ def maze_to_image(maze, name):
                 else:
                     image_file.write("0")
             image_file.write("\n")
-def cool_func():
-    rows = 7
-    cols = 7
+def maze_to_p3(maze, name):
+    # Define some colors
+    black = "0 0 0 "
+    white = "255 255 255 "
+    red = "0 255 0 "
+    green = "0 0 255 "
+
+    # create ppm image from array
+    rows = len(maze)
+    cols = len(maze[0])
+    os.makedirs("images", exist_ok=True)
+    with open(f"images/{name}.ppm", "w") as image_file:
+        image_file.write(f"P3\n{cols} {rows}\n255\n")
+        for row in maze:
+            line = ""
+            for tile in row:
+                if tile == 0:
+                    line += black
+                elif tile == 2:
+                    line += green
+                elif tile == 3:
+                    line += black
+                elif tile == 4:
+                    line += red
+                else:
+                    line += white
+            image_file.write(line.strip()+"\n")
+def main():
+    rows = int(sys.argv[1])
+    cols = int(sys.argv[2])
     new_maze = generate_maze_prim(rows, cols)
     print_maze(new_maze)
-    maze_to_image(new_maze, "maze")
+    maze_to_p3(new_maze, "maze")
     
 
     #generate_maze_kruskal(5,5)
 
 
 
-cool_func()
+main()
