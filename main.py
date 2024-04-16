@@ -118,7 +118,7 @@ if __name__ == '__main__':
         sys.exit("Please provide rows and columns\nUsage: Python main.py (rows) (cols)")
     rows = int(sys.argv[1])
     cols = int(sys.argv[2])
-    if rows < 1 or cols < 1:
+    if rows < 6 or cols < 6:
         sys.exit("ERROR: rows and columns must be a positive integer larger than 5")
     # print("A* Search on pre-determined board")
     # print(a_star(BoardState(board=[[1,-1,-1],[-1,-1,2]], last_tile=[0,0])))
