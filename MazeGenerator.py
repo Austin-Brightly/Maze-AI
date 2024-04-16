@@ -3,7 +3,7 @@ import random
 import sys
 
 # Randomly selects a border wall to become the exit wall
-# TODO: Create more elegant solution/ fix problem of multiple walls
+# TODO: Create more elegant solution
 def create_end_tile(maze, rows, columns, position):
     # POSITION: top=1, bottom=2, left=3, right=any other number
     if position == 1:
@@ -13,6 +13,11 @@ def create_end_tile(maze, rows, columns, position):
             if maze[1][top_index-1] == -1:
                 maze[0][top_index-1] = 2
                 end_created = True
+            elif maze[2][top_index-1] == -1:
+                # Quick hack to account for extra walls
+                maze[0][top_index-1] = 2
+                maze[1][top_index-1] = -1
+                end_created = True
             top_index += 1
     elif position == 2:
         end_created = False
@@ -20,6 +25,11 @@ def create_end_tile(maze, rows, columns, position):
         while not end_created and top_index in range(1, columns - 1):
             if maze[rows-2][top_index] == -1:
                 maze[rows-1][top_index] = 2
+                end_created = True
+            elif maze[rows-3][top_index] == -1:
+                # Quick hack to account for extra walls
+                maze[rows-1][top_index] = 2
+                maze[rows-2][top_index] = -1
                 end_created = True
             top_index += 1
     elif position == 3:
@@ -29,6 +39,11 @@ def create_end_tile(maze, rows, columns, position):
             if maze[top_index-1][1] == -1:
                 maze[top_index-1][0] = 2
                 end_created = True
+            elif maze[top_index-1][2] == -1:
+                # Quick hack to account for extra walls
+                maze[top_index-1][0] = 2
+                maze[top_index-1][1] = -1
+                end_created = True
             top_index += 1
     else:
         end_created = False
@@ -37,6 +52,11 @@ def create_end_tile(maze, rows, columns, position):
             #print(f"top_index:{top_index}, columns:{columns}")
             if maze[top_index-1][columns-2] == -1:
                 maze[top_index-1][columns-1] = 2
+                end_created = True
+            elif maze[top_index - 1][columns - 3] == -1:
+                # Quick hack to account for extra walls
+                maze[top_index - 1][columns - 1] = 2
+                maze[top_index - 1][columns - 2] = -1
                 end_created = True
             top_index += 1
     return maze
@@ -92,7 +112,7 @@ def generate_maze_prim(rows, columns):
     maze[y][x] = 4
 
     #create end and return
-    return (create_end_tile(maze, rows, columns, 4), [x,y])
+    return (create_end_tile(maze, rows, columns, random.randrange(1,5)), [x,y])
 
      #create end bottom
 
@@ -160,11 +180,13 @@ def maze_to_p3(maze, name):
             image_file.write(line.strip()+"\n")
 
 if __name__ == '__main__':
+    if len(sys.argv) < 3:
+        sys.exit("Please provide rows and columns\nUsage: Python MazeGenerator.py (rows) (cols)")
     rows = int(sys.argv[1])
     cols = int(sys.argv[2])
     new_maze = generate_maze_prim(rows, cols)
     print_maze(new_maze[0])
-    maze_to_p3(new_maze, "maze")
+    maze_to_p3(new_maze[0], "maze")
     
 
     #generate_maze_kruskal(5,5)
