@@ -1,13 +1,13 @@
 import copy
 import math
-
+import MazeGenerator
 #import numpy as np
-import tkinter as tk
+#import tkinter as tk
 
 class BoardState:
     """
     Boardstate is a class which represents a maze\
-    3 = start
+    4 = start
     2 = goal tile
     1 = explored space
     0 = wall
@@ -112,4 +112,11 @@ def a_star(start):
 if __name__ == '__main__':
     print("A* Search")
     print(a_star(BoardState(board=[[1,-1,-1],[-1,-1,2]], last_tile=[0,0])))
-
+    print("Getting MazeGenerator Board")
+    maze_gen_board = MazeGenerator.generate_maze_prim(rows=7, columns=7)
+    MazeGenerator.print_maze(maze_gen_board[0])
+    print("Getting Board Solution")
+    board_solution = a_star(BoardState(board=maze_gen_board[0], last_tile=maze_gen_board[1]))
+    print(board_solution[0].board)
+    MazeGenerator.print_maze(board_solution[0].board)
+    MazeGenerator.maze_to_p3(board_solution[0].board, 'solved_board')

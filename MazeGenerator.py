@@ -2,6 +2,8 @@ import os
 import random
 import sys
 
+# Randomly selects a border wall to become the exit wall
+# TODO: Create more elegant solution/ fix problem of multiple walls
 def create_end_tile(maze, rows, columns, position):
     # POSITION: top=1, bottom=2, left=3, right=any other number
     if position == 1:
@@ -39,6 +41,7 @@ def create_end_tile(maze, rows, columns, position):
             top_index += 1
     return maze
 
+# Returns tile coordinates with a distance of the variable ('distance')'s tiles
 def nearby_tiles(x, y, rows, cols, dist):
     cardinal_tiles = [[x - dist, y], [x, y - dist], [x + dist, y], [x, y + dist]]
     wall_list = list(filter(lambda tile: tile[0] in range(1, cols) and tile[1] in range(1, rows), cardinal_tiles))
@@ -46,7 +49,8 @@ def nearby_tiles(x, y, rows, cols, dist):
     return wall_list
 
 
-# Based on prims aglorithm provided by https://www.youtube.com/watch?v=ZXF9-KX4DIQ
+# Based on prims algorithm provided by https://www.youtube.com/watch?v=ZXF9-KX4DIQ
+# TODO: Fix extra walls on certain size mazes, or account for them
 def generate_maze_prim(rows, columns):
     # Initialize maze to all walls, create frontier set
     maze = [[0] * columns for i in range(rows)]
@@ -58,7 +62,6 @@ def generate_maze_prim(rows, columns):
     x = int(columns/2)
     y = int(rows/2)
     maze[y][x] = -1
-    #print(f"x:{x}, y:{y}")
 
     # Compute frontier
     frontier_set = nearby_tiles(x=x, y=y, rows=rows-1, cols=columns-1, dist=2)
@@ -89,7 +92,7 @@ def generate_maze_prim(rows, columns):
     maze[y][x] = 4
 
     #create end and return
-    return create_end_tile(maze, rows, columns, 4)
+    return (create_end_tile(maze, rows, columns, 4), [x,y])
 
      #create end bottom
 
@@ -131,6 +134,7 @@ def maze_to_p3(maze, name):
     white = "255 255 255 "
     red = "0 255 0 "
     green = "0 0 255 "
+    yellow = "255 255 0 "
 
     # create ppm image from array
     rows = len(maze)
@@ -143,6 +147,8 @@ def maze_to_p3(maze, name):
             for tile in row:
                 if tile == 0:
                     line += black
+                elif tile == 1:
+                    line += yellow
                 elif tile == 2:
                     line += green
                 elif tile == 3:
@@ -152,16 +158,14 @@ def maze_to_p3(maze, name):
                 else:
                     line += white
             image_file.write(line.strip()+"\n")
-def main():
+
+if __name__ == '__main__':
     rows = int(sys.argv[1])
     cols = int(sys.argv[2])
     new_maze = generate_maze_prim(rows, cols)
-    print_maze(new_maze)
+    print_maze(new_maze[0])
     maze_to_p3(new_maze, "maze")
     
 
     #generate_maze_kruskal(5,5)
 
-
-
-main()
