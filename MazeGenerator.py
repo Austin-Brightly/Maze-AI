@@ -1,14 +1,22 @@
 import os
 import random
+import sys
 
+# Randomly selects a border wall to become the exit wall
+# TODO: Create more elegant solution
 def create_end_tile(maze, rows, columns, position):
     # POSITION: top=1, bottom=2, left=3, right=any other number
     if position == 1:
         end_created = False
         top_index = 1
         while not end_created and top_index in range(1, columns - 1):
-            if maze[1][top_index] == -1:
-                maze[0][top_index] = 2
+            if maze[1][top_index-1] == -1:
+                maze[0][top_index-1] = 2
+                end_created = True
+            elif maze[2][top_index-1] == -1:
+                # Quick hack to account for extra walls
+                maze[0][top_index-1] = 2
+                maze[1][top_index-1] = -1
                 end_created = True
             top_index += 1
     elif position == 2:
@@ -18,6 +26,11 @@ def create_end_tile(maze, rows, columns, position):
             if maze[rows-2][top_index] == -1:
                 maze[rows-1][top_index] = 2
                 end_created = True
+            elif maze[rows-3][top_index] == -1:
+                # Quick hack to account for extra walls
+                maze[rows-1][top_index] = 2
+                maze[rows-2][top_index] = -1
+                end_created = True
             top_index += 1
     elif position == 3:
         end_created = False
@@ -26,17 +39,29 @@ def create_end_tile(maze, rows, columns, position):
             if maze[top_index-1][1] == -1:
                 maze[top_index-1][0] = 2
                 end_created = True
+            elif maze[top_index-1][2] == -1:
+                # Quick hack to account for extra walls
+                maze[top_index-1][0] = 2
+                maze[top_index-1][1] = -1
+                end_created = True
             top_index += 1
     else:
         end_created = False
         top_index = 1
-        while not end_created and top_index in range(1, columns - 1):
-            if maze[top_index][columns-2] == -1:
-                maze[top_index][columns-1] = 2
+        while not end_created and top_index in range(1, rows - 1):
+            #print(f"top_index:{top_index}, columns:{columns}")
+            if maze[top_index-1][columns-2] == -1:
+                maze[top_index-1][columns-1] = 2
+                end_created = True
+            elif maze[top_index - 1][columns - 3] == -1:
+                # Quick hack to account for extra walls
+                maze[top_index - 1][columns - 1] = 2
+                maze[top_index - 1][columns - 2] = -1
                 end_created = True
             top_index += 1
     return maze
 
+# Returns tile coordinates with a distance of the variable ('distance')'s tiles
 def nearby_tiles(x, y, rows, cols, dist):
     cardinal_tiles = [[x - dist, y], [x, y - dist], [x + dist, y], [x, y + dist]]
     wall_list = list(filter(lambda tile: tile[0] in range(1, cols) and tile[1] in range(1, rows), cardinal_tiles))
@@ -44,7 +69,8 @@ def nearby_tiles(x, y, rows, cols, dist):
     return wall_list
 
 
-# Based on prims aglorithm provided by https://www.youtube.com/watch?v=ZXF9-KX4DIQ
+# Based on prims algorithm provided by https://www.youtube.com/watch?v=ZXF9-KX4DIQ
+# TODO: Fix extra walls on certain size mazes, or account for them
 def generate_maze_prim(rows, columns):
     # Initialize maze to all walls, create frontier set
     maze = [[0] * columns for i in range(rows)]
@@ -56,7 +82,6 @@ def generate_maze_prim(rows, columns):
     x = int(columns/2)
     y = int(rows/2)
     maze[y][x] = -1
-    print(f"x:{x}, y:{y}")
 
     # Compute frontier
     frontier_set = nearby_tiles(x=x, y=y, rows=rows-1, cols=columns-1, dist=2)
@@ -87,7 +112,7 @@ def generate_maze_prim(rows, columns):
     maze[y][x] = 4
 
     #create end and return
-    return create_end_tile(maze, rows, columns, 4)
+    return (create_end_tile(maze, rows, columns, random.randrange(1,5)), [x,y])
 
      #create end bottom
 
@@ -109,7 +134,7 @@ def print_maze(maze):
             else:
                 print(u"\u25A0", end="")
         print()
-def maze_to_image(maze, name):
+def maze_to_p1(maze, name):
     # create ppm image from array
     rows = len(maze)
     cols = len(maze[0])
@@ -123,16 +148,46 @@ def maze_to_image(maze, name):
                 else:
                     image_file.write("0")
             image_file.write("\n")
-def cool_func():
-    rows = 7
-    cols = 7
+def maze_to_p3(maze, name):
+    # Define some colors
+    black = "0 0 0 "
+    white = "255 255 255 "
+    red = "0 255 0 "
+    green = "0 0 255 "
+    yellow = "255 255 0 "
+
+    # create ppm image from array
+    rows = len(maze)
+    cols = len(maze[0])
+    os.makedirs("images", exist_ok=True)
+    with open(f"images/{name}.ppm", "w") as image_file:
+        image_file.write(f"P3\n{cols} {rows}\n255\n")
+        for row in maze:
+            line = ""
+            for tile in row:
+                if tile == 0:
+                    line += black
+                elif tile == 1:
+                    line += yellow
+                elif tile == 2:
+                    line += green
+                elif tile == 3:
+                    line += black
+                elif tile == 4:
+                    line += red
+                else:
+                    line += white
+            image_file.write(line.strip()+"\n")
+
+if __name__ == '__main__':
+    if len(sys.argv) < 3:
+        sys.exit("Please provide rows and columns\nUsage: Python MazeGenerator.py (rows) (cols)")
+    rows = int(sys.argv[1])
+    cols = int(sys.argv[2])
     new_maze = generate_maze_prim(rows, cols)
-    print_maze(new_maze)
-    maze_to_image(new_maze, "maze")
+    print_maze(new_maze[0])
+    maze_to_p3(new_maze[0], "maze")
     
 
     #generate_maze_kruskal(5,5)
 
-
-
-cool_func()

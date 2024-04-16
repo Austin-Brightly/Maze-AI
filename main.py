@@ -1,13 +1,14 @@
 import copy
 import math
-
+import MazeGenerator
+import sys
 #import numpy as np
-import tkinter as tk
+#import tkinter as tk
 
 class BoardState:
     """
     Boardstate is a class which represents a maze\
-    3 = start
+    4 = start
     2 = goal tile
     1 = explored space
     0 = wall
@@ -83,6 +84,7 @@ def a_star(start):
     open = [start]
     closed = []
 
+    #board_interation_count = 0
     # while boardstates are on open, search for goal.
     while len(open) > 0:
         #open.sort(reverse=True, key=lambda x: x.h_value)
@@ -105,11 +107,28 @@ def a_star(start):
             # If goal board found, return success == 1
             if item.is_goal_state:
                 return [item, True]
+        #MazeGenerator.maze_to_p3(current_item.board, name=f'{board_interation_count}')
+        #board_interation_count += 1
     # no solution, return success==0
     return [closed, False]
 
 
 if __name__ == '__main__':
-    print("A* Search")
-    print(a_star(BoardState(board=[[1,-1,-1],[-1,-1,2]], last_tile=[0,0])))
+    if len(sys.argv) < 3:
+        sys.exit("Please provide rows and columns\nUsage: Python main.py (rows) (cols)")
+    rows = int(sys.argv[1])
+    cols = int(sys.argv[2])
+    if rows < 1 or cols < 1:
+        sys.exit("ERROR: rows and columns must be a positive integer larger than 5")
+    # print("A* Search on pre-determined board")
+    # print(a_star(BoardState(board=[[1,-1,-1],[-1,-1,2]], last_tile=[0,0])))
+    # print()
 
+    print("Generating MazeGenerator Board")
+    maze_gen_board = MazeGenerator.generate_maze_prim(rows=rows, columns=cols)
+    MazeGenerator.print_maze(maze_gen_board[0])
+    print("Calculating A* Board Solution")
+    board_solution = a_star(BoardState(board=maze_gen_board[0], last_tile=maze_gen_board[1]))
+    #print(board_solution[0].board)
+    MazeGenerator.print_maze(board_solution[0].board)
+    MazeGenerator.maze_to_p3(board_solution[0].board, 'solved_board')
