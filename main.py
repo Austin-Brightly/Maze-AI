@@ -120,15 +120,13 @@ if __name__ == '__main__':
     cols = int(sys.argv[2])
     if rows < 6 or cols < 6:
         sys.exit("ERROR: rows and columns must be a positive integer larger than 5")
-    # print("A* Search on pre-determined board")
-    # print(a_star(BoardState(board=[[1,-1,-1],[-1,-1,2]], last_tile=[0,0])))
-    # print()
 
     print("Generating MazeGenerator Board")
     maze_gen_board = MazeGenerator.generate_maze_prim(rows=rows, columns=cols)
     MazeGenerator.print_maze(maze_gen_board[0])
+    MazeGenerator.maze_to_p3(maze_gen_board[0], 'maze')
     print("Calculating A* Board Solution")
     board_solution = a_star(BoardState(board=maze_gen_board[0], last_tile=maze_gen_board[1]))
     #print(board_solution[0].board)
     MazeGenerator.print_maze(board_solution[0].board)
-    MazeGenerator.maze_to_p3(board_solution[0].board, 'solved_board')
+    MazeGenerator.maze_to_p3(board_solution[0].board, 'solved_maze')
