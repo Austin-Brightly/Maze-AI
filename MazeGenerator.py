@@ -69,7 +69,7 @@ def nearby_tiles(x, y, rows, cols, dist):
     return wall_list
 
 
-# Based on prims algorithm provided by https://www.youtube.com/watch?v=ZXF9-KX4DIQ
+# Based on prims algorithm
 # TODO: Fix extra walls on certain size mazes, or account for them
 def generate_maze_prim(rows, columns):
     # Initialize maze to all walls, create frontier set
